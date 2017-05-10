@@ -14,7 +14,7 @@ using JsonFx.Json;
 using UnityEngine;
 using System.Net.Sockets;
 
-namespace TelemetryPlugin
+namespace Spectrum.Plugins.Telemetry
 {
 
     public class Entry : IPlugin, IUpdatable
@@ -35,6 +35,7 @@ namespace TelemetryPlugin
         NetworkStream tcpStream;
         TextWriter tcpWriter;
         Guid instance_id;
+        Guid race_id;
         string conn_host;
         int conn_port;
         bool wings = false;
@@ -46,6 +47,7 @@ namespace TelemetryPlugin
         {
             //Console.WriteLine(writer.Write(data));
             data["Sender_ID"] = instance_id.ToString("B");
+            data["Race_ID"] = race_id.ToString("B");
             if (tcpClient.Connected)
             {
                 writer.Settings.PrettyPrint = false;
@@ -69,6 +71,7 @@ namespace TelemetryPlugin
         private void RaceStarted(object sender, EventArgs e)
         {
             Console.WriteLine("[Telemetry] Starting...");
+            race_id = Guid.NewGuid();
             sw = Stopwatch.StartNew();
             active = true;
             data = new Dictionary<string, object>();
@@ -115,8 +118,11 @@ namespace TelemetryPlugin
             Race.Started += RaceStarted;
             LocalVehicle.Finished += RaceEnded;
             _settings = new Settings(typeof(Entry));
-            _settings["Host"] = "127.0.0.1";
-            _settings["Port"] = 31337;
+            if (!_settings.ContainsKey("Host"))
+                _settings["Host"] = "127.0.0.1";
+            if (!_settings.ContainsKey("Port"))
+                _settings["Port"] = 31337;
+            _settings.Save();
             conn_host=_settings.GetItem<string>("Host");
             conn_port=_settings.GetItem<int>("Port");
             
