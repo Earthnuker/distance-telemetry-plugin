@@ -19,3 +19,7 @@ References:
 - JsonFX (`JsonFx.dll` in your Spectrum folder)
 - Assembly-CSharp (`Assembly-CSharp.dll` in your Distance\Distance_Data\Managed folder)
 - UnityEngine (`UnityEngine.dll` in your Distance\Distance_Data\Managed folder)
+
+# Installation
+
+Just drop  `Telemetry.plugin.dll` into your Spectrum plugins folder
