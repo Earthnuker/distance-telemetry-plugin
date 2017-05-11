@@ -33,11 +33,11 @@ namespace Spectrum.Plugins.Telemetry
         CarLogic car_log;
         TcpClient tcpClient;
         NetworkStream tcpStream;
-        TextWriter tcpWriter;
+        TextWriter data_writer;
         Guid instance_id;
         Guid race_id;
-        string conn_host;
-        int conn_port;
+        string conn_host="";
+        int conn_port = -1;
         bool wings = false;
         bool has_wings = true;
         private Settings _settings;
@@ -48,23 +48,20 @@ namespace Spectrum.Plugins.Telemetry
             //Console.WriteLine(writer.Write(data));
             data["Sender_ID"] = instance_id.ToString("B");
             data["Race_ID"] = race_id.ToString("B");
-            if (tcpClient.Connected)
-            {
-                writer.Settings.PrettyPrint = false;
-                writer.Write(data, tcpWriter);
-                tcpWriter.WriteLine();
-                tcpWriter.Flush();
+            if ((conn_host != "") && (conn_port != -1)) { 
+                if (!tcpClient.Connected)
+                {
+                    Console.WriteLine("[Telemetry] Reconnecting...");
+                    tcpClient = new TcpClient(conn_host, conn_port);
+                    tcpClient.Connect(conn_host, conn_port);
+                    tcpStream = tcpClient.GetStream();
+                    data_writer = new StreamWriter(tcpStream);
+                }
             }
-            else {
-                tcpClient = new TcpClient(conn_host, conn_port);
-                tcpClient.Connect(conn_host, conn_port);
-                tcpStream = tcpClient.GetStream();
-                tcpWriter = new StreamWriter(tcpStream);
-                writer.Settings.PrettyPrint = false;
-                writer.Write(data, tcpWriter);
-                tcpWriter.WriteLine();
-                tcpWriter.Flush();
-            }
+            writer.Settings.PrettyPrint = false;
+            writer.Write(data, data_writer);
+            data_writer.WriteLine();
+            data_writer.Flush();
             return;
         }
 
@@ -112,24 +109,40 @@ namespace Spectrum.Plugins.Telemetry
         public void Initialize(IManager manager)
         {
             writer.Settings.PrettyPrint = true;
-            instance_id =  Guid.NewGuid();
+            instance_id = Guid.NewGuid();
             Console.WriteLine("[Telemetry] Initializing...");
-            Console.WriteLine("[Telemetry] Instance ID {0} ...",instance_id.ToString("B"));
+            Console.WriteLine("[Telemetry] Instance ID {0} ...", instance_id.ToString("B"));
             Race.Started += RaceStarted;
             LocalVehicle.Finished += RaceEnded;
             _settings = new Settings(typeof(Entry));
-            if (!_settings.ContainsKey("Host"))
-                _settings["Host"] = "127.0.0.1";
-            if (!_settings.ContainsKey("Port"))
-                _settings["Port"] = 31337;
+
+            if (!_settings.ContainsKey("Host")) { 
+                _settings["Host"] = conn_host;
+            } else { 
+                conn_host = _settings.GetItem<string>("Host");
+            }
+            if (!_settings.ContainsKey("Port")) { 
+                _settings["Port"] = conn_port;
+            }else { 
+                conn_port = _settings.GetItem<int>("Port");
+            }
+
+            if (!_settings.ContainsKey("File_Prefix")) { 
+                _settings["File_Prefix"] = "Telemetry";
+            }
+
             _settings.Save();
-            conn_host=_settings.GetItem<string>("Host");
-            conn_port=_settings.GetItem<int>("Port");
-            
-            tcpClient = new TcpClient(conn_host, conn_port);
-            tcpStream = tcpClient.GetStream();
-            tcpWriter = new StreamWriter(tcpStream);
-            
+            if (conn_port != 0 && conn_host != "") {
+                Console.WriteLine("[Telemetry] Connecting to {0}:{1}...",conn_host,conn_port);
+                tcpClient = new TcpClient(conn_host, conn_port);
+                tcpStream = tcpClient.GetStream();
+                data_writer = new StreamWriter(tcpStream);
+            } else {
+                string log_filename = "telemetry/" + _settings["File_Prefix"] + "_" + string.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now)+".jsonl";
+                data_writer = new StreamWriter(log_filename);
+                Console.WriteLine("[Telemetry] Opening {0} ...", log_filename);
+            }
+
             LocalVehicle.WingsOpened += (sender, e) => { wings = true; };
             LocalVehicle.WingsClosed += (sender, e) => { wings = false; };
             LocalVehicle.WingsEnabled += (sender, e) => { has_wings = true; };
