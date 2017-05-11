@@ -27,7 +27,7 @@ Just drop `Telemetry.plugin.dll` into your Spectrum plugins folder
 # Configuration
 
 The configuration file is located in `Distance\Distance_Data\Spectrum\Settings\`,
-it' s a simple JSON file with 3 keys:
+it's a simple JSON file with 3 keys:
 
 - Host: Host to connect to for streaming data over TCP (use "" to disable TCP Streaming)
 - Port: Port to connect on (use 0 to disable TCP Streaming)
