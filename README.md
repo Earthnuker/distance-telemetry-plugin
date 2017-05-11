@@ -52,7 +52,7 @@ to the listening TCP Socket, the format should be fairly self-explanatory
 When the connection drops an automatic reconnect attempt is made, this may cause
 lag in Game.
 
-If TCP mode is not enabled a file name <Prefix>_<Current Date and Time>.jsonl is
+If TCP mode is not enabled a file name \<Prefix>_\<Current Date and Time>.jsonl is
 created in the telemetry subfolder under the Distance main folder
 (where the main executable (Distance.exe on Windows) is).
 
