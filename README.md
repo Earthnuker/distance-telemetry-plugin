@@ -30,12 +30,12 @@ The configuration file is located in `Distance\Distance_Data\Spectrum\Settings\`
 it's a simple JSON file with 3 keys:
 
 - Host: Host to connect to for streaming data over TCP (use "" to disable TCP Streaming)
-- Port: Port to connect on (use 0 to disable TCP Streaming)
+- Port: Port to connect on (use -1 to disable TCP Streaming)
 - File_Prefix: Filename prefix to write data to (only use when TCP is disables)
 
 Default Values are as follows:
 - Host: ""
-- Port: 0
+- Port: -1
 - File_Prefix: "Telemetry"
 
 Note:
