@@ -1,0 +1,17 @@
+﻿{
+  "FriendlyName": "Telemetry Plugin",
+  "Author": "Earthnuker",
+  "AuthorContact": "earthnuker@gmail.com",
+  "CompatibleAPILevel": 6,
+  "IPCIdentifier": "TelemetryPlugin",
+
+  "ModuleFileName": "Telemetry.plugin.dll",
+  "EntryClassName": "Entry",
+
+  "Priority": 10,
+  "SkipLoad": false,
+
+  "Dependencies": [
+    "Spectrum.Interop.dll"
+  ]
+}
